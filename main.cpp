@@ -5,57 +5,17 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QGraphicsView>
-#include <QGraphicsScene>
 #include <QGraphicsEllipseItem>
 #include <QMouseEvent>
 #include <string>
 #include <QFileDialog>
 #include <QString>
 #include <QComboBox>
-#include <QMainWindow>
 #include <QInputDialog>
-#include <QGraphicsView>
 #include <QMessageBox>
 
 #include "UndirectedGraph.h"
 
-int currentIndex1 = -1;
-int currentIndex2 = -1;
-int currentIndex3 = -1;
-
-
-void createComboBox1(QComboBox* comboBox) {
-    comboBox->addItem("Directed graph");
-    comboBox->addItem("Undirected graph");
-
-}
-
-void createComboBox2(QComboBox* comboBox) {
-    comboBox->addItem("Int");
-    comboBox->addItem("Float");
-    comboBox->addItem("Double");
-}
-
-void createComboBox3(QComboBox* comboBox) {
-    comboBox->addItem("Int");
-    comboBox->addItem("Float");
-    comboBox->addItem("Double");
-}
-
-int updateSelectedIndex1(QComboBox *comboBox) {
-    currentIndex1 = comboBox->currentIndex();
-    return currentIndex1;
-}
-
-int updateSelectedIndex2(QComboBox *comboBox) {
-    currentIndex2 = comboBox->currentIndex();
-    return currentIndex2;
-}
-
-int updateSelectedIndex3(QComboBox *comboBox) {
-    currentIndex3 = comboBox->currentIndex();
-    return currentIndex3;
-}
 
 QWidget* createMainPage(QStackedWidget *stackedWidget) {
     QWidget *page = new QWidget;
@@ -179,16 +139,22 @@ UndirectedGraph<int, int> GraphView::getGraph() {
 QWidget* createPage3(QStackedWidget *stackedWidget) {
     QWidget *page = new QWidget;
     QVBoxLayout *layout = new QVBoxLayout(page);
-    QLabel *label = new QLabel;
-    label->setText("<font color = 'darkCyan', span style = 'font-size: 20px;'>Draw Graph</font>");
-    label->setAlignment(Qt::AlignHCenter);
+    QLabel *label1 = new QLabel;
+    label1->setText("<font color = 'darkCyan', span style = 'font-size: 20px;'>Draw Graph</font>");
+
+    label1->setAlignment(Qt::AlignHCenter);
+    layout->addWidget(label1);
     GraphView *graphView = new GraphView(page);
     graphView->setMinimumSize(600, 400);
     layout->addWidget(graphView);
     QPushButton *buttonBack = new QPushButton("Go home", page);
     buttonBack->setStyleSheet("color: darkCyan; background-color: darkGray");
-    layout->addWidget(label);
-    layout->addWidget(buttonBack);
+
+    QLabel *label2 = new QLabel;
+    label2->setText("<font color = 'darkCyan', span style = 'font-size: 15px;'>Finding shortest path between</font>");
+    label2->setAlignment(Qt::AlignHCenter);
+    layout->addWidget(label2);
+
     page->setLayout(layout);
     QObject::connect(buttonBack, &QPushButton::clicked, [=]() { stackedWidget->setCurrentIndex(0); });
     QHBoxLayout *inputLayout = new QHBoxLayout;
@@ -202,12 +168,13 @@ QWidget* createPage3(QStackedWidget *stackedWidget) {
     QPushButton *findPathButton = new QPushButton("Find Shortest Path", page);
     findPathButton->setStyleSheet("color: darkCyan; background-color: darkGray");
     layout->addWidget(findPathButton);
+    layout->addWidget(buttonBack);
     QObject::connect(findPathButton, &QPushButton::clicked, [=]() {
         bool ok1, ok2;
         int startVertex = startEdit->text().toInt(&ok1);
         int endVertex = endEdit->text().toInt(&ok2);
         UndirectedGraph<int, int> graph = graphView->getGraph();
-        if (ok1 && ok2 ) {
+        if (ok1 && ok2 && graph.getSize() != 0) {
             std::cout << "Start vertex: " << startVertex << std::endl;
             std::cout << "End vertex: " << endVertex << std::endl;
             Path<int> shortestPath = graph.dijkstraPath(startVertex, endVertex);
@@ -224,7 +191,7 @@ QWidget* createPage3(QStackedWidget *stackedWidget) {
             QMessageBox::information(page, message.c_str() , pathString.c_str());
             //QMessageBox::information(page, "Shortest Path", "Shortest path found!");
         } else {
-            QMessageBox::warning(page, "Invalid Input", "Please enter valid integers for start and end vertices.");
+            QMessageBox::warning(page, "Invalid Input", "There is no path between the vertices or the vertices themselves. Please try again.");
         }
     });
     return page;
@@ -238,7 +205,6 @@ int main(int argc, char *argv[]) {
     QWidget *mainWindow = new QWidget;
     QStackedWidget *stackedWidget = new QStackedWidget(mainWindow);
     stackedWidget->addWidget(createMainPage(stackedWidget));
-    //stackedWidget->addWidget(createPage2(stackedWidget));
     stackedWidget->addWidget(createPage3(stackedWidget));
 
     QVBoxLayout *mainLayout = new QVBoxLayout(mainWindow);
